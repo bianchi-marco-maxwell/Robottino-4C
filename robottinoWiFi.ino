@@ -1,14 +1,14 @@
-#include <SoftwareSerial.h>
+#include <SoftwareSerial.h>// va a richiamare la libreria "SoftwareSerial.h"
 
 #define rxPin 10
 #define txPin 8
-// Set up a new SoftwareSerial object
+//Configura un nuovo oggetto SoftwareSerial
 SoftwareSerial mySerial =  SoftwareSerial(rxPin, txPin);
 
 String check4answer(){
     String str = "";
     while (mySerial.available() > 0) {
-        char c = mySerial.read();
+        char c=mySerial.read();
         Serial.print(c);
         str += String(c);
     }
@@ -20,27 +20,26 @@ String esp01cmd(String cmd) {
   Serial.println("sending: " + cmd);
   mySerial.println(cmd);
   delay(10);
-  String risposta = check4answer();
-  return risposta;
+  return check4answer();
 }
 
 void setup()  {
-    // Define pin modes for TX and RX
-    // pinMode(rxPin, INPUT);
-    // pinMode(txPin, OUTPUT);
+    // Definisce le modalità  di pin per TX e RX
+    pinMode(rxPin, INPUT);
+    pinMode(txPin, OUTPUT);
     
-    // Set the baud rate for the SoftwareSerial object
+    // Imposta la velocità di trasmissione per l'oggetto SoftwareSerial
     mySerial.begin(115200);
     Serial.begin(9600);
     delay(1000);
     esp01cmd("AT");
     delay(1000);
-    esp01cmd("AT+CWMODE=2");
+    esp01cmd("AT+CWMODE=2"); // fa in modo che il robottino funzuìioni come acces point e quindi come server
     delay(1000);
-    esp01cmd("AT+CWSAP=\"robottino\",\"robottino\",1,4");
+    esp01cmd("AT+CWSAP=\"robottino\",\"robottino\",1,4"); //imposta ssid, poi la password, il canale e la crittografia 
     delay(1000);
-    esp01cmd("AT+CIFSR"); //show AP IP address
-    esp01cmd("AT+CIPMUX=1"); //allow up to 1 connections at the time
+    esp01cmd("AT+CIFSR"); //mostra l'indirizzo IP dell'AP
+    esp01cmd("AT+CIPMUX=1"); //consente ad un massimo di 1 connessione alla volta
     
     
     Serial.println("ESP-01 Configuration Completed");
@@ -54,22 +53,20 @@ void loop() {
     }
 
     Serial.println("Connection from remote device was Established!!!");
-    //Socket ID: 3
-    //accept packets from any IP address/devices
-    //Listen to local port 4567
-    //outgoing packets could go to any remote host without restrictions...
-    esp01cmd("AT+CIPSTART=3,\"UDP\",\"0.0.0.0\",0,4567,2"); //starting UDP Socket Server 
+    //ID socket: 3
+    //accetta pacchetti da qualsiasi indirizzo/dispositivo IP
+    //Ascolta la porta locale 4567
+    //i pacchetti in uscita possono essere inviati a qualsiasi host remoto senza restrizioni
+    esp01cmd("AT+CIPSTART=3,\"UDP\",\"0.0.0.0\",0,4567,2"); //avvio del server socket UDP
+
     
-//    String str = ;    
-//    Serial.println("received: "+esp01cmd("AT+CWLIF").substring(11,18));
+
     delay(3000);
     while(true) {
       String str = mySerial.readString();
       if(str != "") {
         int startOfSTR = str.indexOf(":",10)+1;
         Serial.println("Received: "+str.substring(startOfSTR));
-        //Serial.println("Received: "+str);
-        //Serial.println(startOfSTR);
       }
     }
 
