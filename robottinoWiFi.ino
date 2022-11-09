@@ -89,6 +89,16 @@ void loop() {
         //Serial.println("Received: "+str);
         //Serial.println(startOfSTR);
       }
+        
+      str = Serial.readString(); //riceviamo da Monitor Seriale
+      if(str != "") {
+        Serial.println("Received from Serial Monitor: "+str);
+        String str1 = "AT+CIPSEND=1," ;
+        str1.concat(str.length()+1);
+        Serial.println(str1);
+        esp01cmd(str1);
+        esp01cmd(str);        
+      }
     }
 
 }
