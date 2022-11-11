@@ -52,7 +52,7 @@ void setup()  {
     esp01cmd("AT+CWSAP=\"robottino\",\"robottino\",1,4");
     delay(1000);
     esp01cmd("AT+CIFSR"); //show AP IP address
-    esp01cmd("AT+CIPMUX=1"); //allow up to 1 connections at the time
+    esp01cmd("AT+CIPMUX=0"); //allow up to 1 connections at the time
     
     
     Serial.println("ESP-01 Configuration Completed");
@@ -65,39 +65,50 @@ void loop() {
       delay(1000);
     }
 
-    String cellphoneIP = esp01cmd("AT+CWLIF").substring(11,22);
+    String str = esp01cmd("AT+CWLIF");
+    int startOfSTR = str.indexOf(',',18);  //IP finsce prima della virgola
+    String cellphoneIP = str.substring(11,startOfSTR);
     Serial.println(cellphoneIP);
     Serial.println("Connection from remote device was Established!!!");
+
+    // AT+CIPSTART=<id>,<type>,<remote address>,<remote port>[,(<local port>),(<mode>)]
+    // AT+CIPSEND=[<id>,]<length>[,<ip>,<port>]
+    // AT+CIPCLOSE=<id>
+    
+    //Socket Server: server in ascolto, pronto a ricevere pacchetti UDP da WIFI
     //Socket ID: 3
     //accept packets from any IP address/devices
     //Listen to local port 4567
     //outgoing packets could go to any remote host without restrictions...
+    esp01cmd("AT+CIPCLOSE=3"); //close socket if for any reason it was already open
     esp01cmd("AT+CIPSTART=3,\"UDP\",\"0.0.0.0\",0,4567,2"); //starting UDP Socket Server 
-    esp01cmd("AT+CIPSTART=1,\"UDP\",\""+cellphoneIP+"\",1234"); //starting UDP Socket Client 
+
     
-//    String str = ;    
-//    Serial.println("received: "+esp01cmd("AT+CWLIF").substring(11,18));
+    //esp01cmd("AT+CIPSTART=1,\"UDP\",\""+cellphoneIP+"\",1234"); //starting UDP Socket Client 
+    
     delay(3000);
+
     while(true) {
 
-      String str = mySerial.readString();
+      // dati ricevuti da Modulo WIFI
+      str = mySerial.readString();
       if(str != "") {
         int startOfSTR = str.indexOf(":",10)+1;
-        Serial.println("Received: "+str.substring(startOfSTR));
-        //Serial.println(startOfSTR);
+        Serial.println("Received: "+str);
+        Serial.println("Message: "+str.substring(startOfSTR));
       }
 
-      str = Serial.readString(); //riceviamo da Monitor Seriale
+      // dati ricevuti da Monitor Seriale
+      str = Serial.readString(); 
       if(str != "") {
         Serial.println("Received from Serial Monitor: "+str);
         //String str1 = "AT+CIPSEND=1," + str.length(); NOT WORKING??? bug???
-        String str1 = "AT+CIPSEND=1,";
-        str1 = str1 + str.length();
+        String str1 = "AT+CIPSEND=3,";
+        str1 = str1 + str.length() + ",\"" + cellphoneIP + "\",1234";
         //str1.concat(str.length());
         //Serial.println(str1);
         esp01cmd(str1);
         esp01cmd(str);        
       }
-
     }
 }
