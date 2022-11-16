@@ -91,13 +91,20 @@ void loop() {
     while(true) {
 
       // dati ricevuti da Modulo WIFI
+       // sintassi comandi per il robottino: a(avanti),d(destra),s(sinistra),i(indietro) sarebbero i nomi dei comandi  
+       // poi inseriamo un numero per indicare la durata del comando
+       // a, 100 = avanti per 100 millisecondi; d, 300 = girare a destra per 300 millisecondi
       str = mySerial.readString();
       if(str != "") {
         int startOfSTR = str.indexOf(":",10)+1;
         Serial.println("Received: "+str);
         Serial.println("Message: "+str.substring(startOfSTR));
+        switch(str){
+        
+        }
+          
       }
-
+      
       // dati ricevuti da Monitor Seriale
       str = Serial.readString(); // legge la stringa inserita nel monitor seriale
       if(str != "") { // se la stringa non è vuota esegue l'if
