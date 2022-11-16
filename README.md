@@ -1,4 +1,4 @@
-# Robottino-4C
+# Robottino-4C by Bianchi
 Robottino per la classe 4C del Maxwell
 
 Implementa la ricezione di pacchetti UDP dal modulo WiFi (ESP01) configurato come Access Point, e l'inoltro del contenuto (testo) al monitor seriale collegato all'Arduino.
