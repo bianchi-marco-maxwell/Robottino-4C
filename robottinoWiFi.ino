@@ -52,10 +52,23 @@ void setup()  {
     esp01cmd("AT+CWSAP=\"robottino\",\"robottino\",1,4");
     delay(1000);
     esp01cmd("AT+CIFSR"); //show AP IP address
-    esp01cmd("AT+CIPMUX=0"); //allow up to 1 connections at the time
+    esp01cmd("AT+CIPMUX=1"); //allow up to 1 connections at the time
     
     
     Serial.println("ESP-01 Configuration Completed");
+}
+
+void printlnWIFI(String str, String cellIP) {
+      if(str != "") {
+        Serial.println("Received from Serial Monitor: "+str);
+        //String str1 = "AT+CIPSEND=1," + str.length(); NOT WORKING??? bug???
+        String str1 = "AT+CIPSEND=3,";
+        str1 = str1 + str.length() + ",\"" + cellIP + "\",1234";
+        //str1.concat(str.length());
+        //Serial.println(str1);
+        esp01cmd(str1);
+        esp01cmd(str);        
+      }    
 }
 
 void loop() {
@@ -93,22 +106,33 @@ void loop() {
       // dati ricevuti da Modulo WIFI
       str = mySerial.readString();
       if(str != "") {
+
         int startOfSTR = str.indexOf(":",10)+1;
         Serial.println("Received: "+str);
         Serial.println("Message: "+str.substring(startOfSTR));
+        str = str.substring(startOfSTR);
+          
+        char cmd = str[0];
+        int durata = str.substring(1).toInt();
+  
+        Serial.println(cmd);
+  
+        switch (cmd){
+        case 'a': 
+            printlnWIFI("Avanti di " + String(durata), cellphoneIP);
+            break;
+        case 'i': 
+            printlnWIFI("Indietro di " + String(durata), cellphoneIP);
+            break;
+        default:
+            printlnWIFI("Comando non esistente: ", cellphoneIP);
+            break;
+        }
+          
       }
 
       // dati ricevuti da Monitor Seriale
       str = Serial.readString(); 
-      if(str != "") {
-        Serial.println("Received from Serial Monitor: "+str);
-        //String str1 = "AT+CIPSEND=1," + str.length(); NOT WORKING??? bug???
-        String str1 = "AT+CIPSEND=3,";
-        str1 = str1 + str.length() + ",\"" + cellphoneIP + "\",1234";
-        //str1.concat(str.length());
-        //Serial.println(str1);
-        esp01cmd(str1);
-        esp01cmd(str);        
-      }
+      printlnWIFI(str, cellphoneIP);
     }
 }
